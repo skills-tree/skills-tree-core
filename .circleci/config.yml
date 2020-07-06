@@ -31,6 +31,8 @@ jobs:
       # Unit & Integration Tests
       - run: mvn verify
 
+      - run: mvn -s .circleci/settings.xml deploy
+
       # - run: mvn sonar:sonar
 
 #workflows:
