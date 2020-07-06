@@ -97,7 +97,8 @@ public class SkillsTreeJson {
 
         private Text text;
 
-        private String innerHTML;
+        @JsonProperty("innerHTML")
+        private String innerHtml;
 
         @JsonProperty("HTMLclass")
         private String htmlClass;
@@ -116,12 +117,12 @@ public class SkillsTreeJson {
             return this;
         }
 
-        public String getInnerHTML() {
-            return innerHTML;
+        public String getInnerHtml() {
+            return innerHtml;
         }
 
-        public NodeStructure setInnerHTML(String innerHTML) {
-            this.innerHTML = innerHTML;
+        public NodeStructure setInnerHtml(String innerHtml) {
+            this.innerHtml = innerHtml;
             return this;
         }
 

@@ -7,16 +7,29 @@ import com.github.skillstree.core.model.UserSkill;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+/**
+ * The database access layer, which works with skills tree entities.
+ */
 public class PersistenceService {
 
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * Create an instance of the service. The following environment variables should be provided:
+     * <ul>
+     *     <li>RDB_DB_NAME</li>
+     *     <li>RDB_USERNAME</li>
+     *     <li>RDB_PASSWORD</li>
+     *     <li>RDB_HOSTNAME</li>
+     *     <li>RDB_PORT</li>
+     * </ul>
+     */
     public PersistenceService() {
-        String dbName = Objects.requireNonNullElse(System.getenv("RDS_DB_NAME"), "se_skills_tree");
-        String userName = Objects.requireNonNullElse(System.getenv("RDS_USERNAME"), "postgres");
-        String password = Objects.requireNonNullElse(System.getenv("RDS_PASSWORD"), "postgres");
-        String hostname = System.getenv("RDS_HOSTNAME");
-        String port = Objects.requireNonNullElse(System.getenv("RDS_PORT"), "5432");
+        String dbName = Objects.requireNonNullElse(System.getenv("RDB_DB_NAME"), "se_skills_tree");
+        String userName = Objects.requireNonNullElse(System.getenv("RDB_USERNAME"), "postgres");
+        String password = Objects.requireNonNullElse(System.getenv("RDB_PASSWORD"), "postgres");
+        String hostname = System.getenv("RDB_HOSTNAME");
+        String port = Objects.requireNonNullElse(System.getenv("RDB_PORT"), "5432");
         String jdbcUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
 
         DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
@@ -28,6 +41,9 @@ public class PersistenceService {
         jdbcTemplate = new JdbcTemplate(dataSourceBuilder.build());
     }
 
+    /**
+     * Initializes the neccessary tables if the don't exist.
+     */
     public void initTables() {
         jdbcTemplate.update("create table if not exists skills " +
                 "(id uuid, code varchar constraint skills_pk primary key)");
@@ -39,6 +55,11 @@ public class PersistenceService {
                 "constraint user_skills_pk primary key (userId, skillId))");
     }
 
+    /**
+     * Retrieves {@link SkillsIdMapping} by its code.
+     * @param code code of {@link SkillsIdMapping}
+     * @return {@link SkillsIdMapping}
+     */
     public SkillsIdMapping getByCode(String code) {
         try {
             return jdbcTemplate.queryForObject("SELECT * FROM skills WHERE code=?", SkillsIdMapping.class, code);
@@ -47,6 +68,10 @@ public class PersistenceService {
         }
     }
 
+    /**
+     * Retrieves all {@link SkillsIdMapping}.
+     * @return skills id mappings as {@link Map} with code as a key and its id as a value.
+     */
     public Map<String, UUID> getAllMappings() {
         return jdbcTemplate.query("SELECT id, code FROM skills", rs -> {
             Map<String, UUID> result = new HashMap<>();
@@ -57,6 +82,10 @@ public class PersistenceService {
         });
     }
 
+    /**
+     * Saves {@link SkillsIdMapping} entity.
+     * @param skillsIdMapping entity to save
+     */
     public void save(SkillsIdMapping skillsIdMapping) {
         try {
             SkillsIdMapping simKnown = jdbcTemplate.queryForObject(
@@ -73,11 +102,10 @@ public class PersistenceService {
         }
     }
 
-    public String getLastCommit() {
-        return jdbcTemplate.query("SELECT last_commit FROM last_commit LIMIT 1",
-                rs -> rs.next() ? rs.getString(1) : null);
-    }
-
+    /**
+     * Saves last commit's id.
+     * @param lastCommit the id of last commit made in skills repository
+     */
     public void save(String lastCommit) {
         String lastKnownCommit = jdbcTemplate.query("SELECT last_commit FROM last_commit LIMIT 1",
                 rs -> rs.next() ? rs.getString(1) : null);
@@ -88,6 +116,20 @@ public class PersistenceService {
         }
     }
 
+    /**
+     * Returns the last commit made in skills repository.
+     * @return id of the commit
+     */
+    public String getLastCommit() {
+        return jdbcTemplate.query("SELECT last_commit FROM last_commit LIMIT 1",
+                rs -> rs.next() ? rs.getString(1) : null);
+    }
+
+    /**
+     * Retrieves the list of obtained by the user skills by user ID.
+     * @param userId user ID
+     * @return list of obtained by the user skills
+     */
     public List<UserSkill> getUserSkills(String userId) {
         return jdbcTemplate.query("SELECT skillId, level FROM user_skills WHERE userId=?", new Object[]{userId},
                 rs -> {
@@ -101,13 +143,23 @@ public class PersistenceService {
                 });
     }
 
+    /**
+     * Updates the list of obtained by the user skills.
+     * @param userId     user ID
+     * @param userSkills list of skills
+     */
     public void updateUserSkills(String userId, List<UserSkill> userSkills) {
         userSkills.forEach(us -> updateUserSingleSkill(userId, us));
     }
 
+    /**
+     * Inserts a new skills to the list of obtained by the user skills.
+     * @param userId    user ID
+     * @param userSkill skill
+     */
     private void updateUserSingleSkill(String userId, UserSkill userSkill) {
         jdbcTemplate.update("INSERT INTO user_skills (userId, skillId, level) VALUES (?, ?, ?) " +
-                "ON CONFLICT (userid, skillid) DO UPDATE SET level = ?",
+                        "ON CONFLICT (userid, skillid) DO UPDATE SET level = ?",
                 userId, userSkill.getSkillId(), userSkill.getLevel(), userSkill.getLevel());
     }
 }

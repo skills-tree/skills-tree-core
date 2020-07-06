@@ -3,11 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/openjdk:11-jdk-buster
-
     working_directory: ~/repo
-
-    environment:
-      MAVEN_OPTS: -Xmx3200m
 
     steps:
       - checkout
@@ -31,12 +27,21 @@ jobs:
       # Unit & Integration Tests
       - run: mvn verify
 
+  deploy:
+    docker:
+      - image: circleci/openjdk:11-jdk-buster
+    working_directory: ~/repo
+
+    steps:
       - run: mvn -s .circleci/settings.xml deploy
 
-      # - run: mvn sonar:sonar
-
-#workflows:
-#  main:
-#    jobs:
-#      - build:
-#          context: SonarCloud
+workflows:
+  main:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master

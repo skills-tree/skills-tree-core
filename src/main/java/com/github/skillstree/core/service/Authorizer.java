@@ -22,6 +22,12 @@ public class Authorizer {
 
     private static final Pattern USERS_PATH_PATTERN = Pattern.compile("(users\\/)([a-zA-Z0-9|]*)(\\/*)");
 
+    /**
+     * Checks if the owner of the JWT token has the access to the specified path,
+     * @param path     path to which access is requested
+     * @param jwtToken JWT token
+     * @return true / false
+     */
     public boolean hasAccess(String path, String jwtToken) {
         logger.info("Path: {}", path);
         logger.info("JWT token: {}", jwtToken);
