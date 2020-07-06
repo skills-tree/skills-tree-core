@@ -36,7 +36,10 @@ jobs:
 
     steps:
       - checkout
-      - run: mvn -s .circleci/settings.xml -DskipTests deploy
+      - when:
+          condition: false
+          steps:
+            - run: mvn -s .circleci/settings.xml -DskipTests deploy
 
 workflows:
   main:
