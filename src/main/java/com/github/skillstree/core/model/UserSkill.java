@@ -36,10 +36,15 @@ public class UserSkill {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserSkill userSkill = (UserSkill) o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        UserSkill userSkill = (UserSkill) obj;
         return level == userSkill.level &&
                 Objects.equals(skillId, userSkill.skillId);
     }

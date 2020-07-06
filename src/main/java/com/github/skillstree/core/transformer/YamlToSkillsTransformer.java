@@ -23,6 +23,12 @@ public class YamlToSkillsTransformer {
         this.persistedSkills = persistedSkills;
     }
 
+    /**
+     * Parses the directory with skills files and creates the corresponding {@link SkillsTree}.
+     * @param baseDir directory with skills files
+     * @return {@link SkillsTree}
+     * @throws IOException if problem with files occurred
+     */
     public SkillsTree transform(File baseDir) throws IOException {
         if (!baseDir.isDirectory()) {
             throw new IllegalArgumentException("Skills set directory should be a directory");

@@ -26,7 +26,7 @@ public class SkillsUpdater {
 
     private final GitExtractor gitExtractor;
 
-    private final SkillsToJsonTreeTransformer sToJsonTransformer;
+    private final SkillsToJsonTreeTransformer skillsToJsonTransformer;
 
     private final WebSiteConstructor webSiteConstructor;
 
@@ -38,24 +38,38 @@ public class SkillsUpdater {
         this(webSiteConstructor, new PersistenceService(), new SkillsToJsonTreeTransformer());
     }
 
+    /**
+     * Constructor.
+     * @param webSiteConstructor      web site constructor
+     * @param persistenceService      persistence service
+     * @param skillsToJsonTransformer skills to json transformer
+     */
     public SkillsUpdater(WebSiteConstructor webSiteConstructor, PersistenceService persistenceService,
-                         SkillsToJsonTreeTransformer sToJsonTransformer) {
+                         SkillsToJsonTreeTransformer skillsToJsonTransformer) {
 
         this.webSiteConstructor = webSiteConstructor;
         this.persistence = persistenceService;
-        this.sToJsonTransformer = sToJsonTransformer;
+        this.skillsToJsonTransformer = skillsToJsonTransformer;
 
         File repoDir = new File(new File(System.getProperty("java.io.tmpdir"))
                 .getAbsolutePath() + File.separator + "skills");
         this.gitExtractor = new GitExtractor(repoDir);
     }
 
+    /**
+     * Retrieves all previously persisted skills mappings.
+     */
     public void pullPreviouslyPersistedSkills() {
         persistence.initTables();
         persistedSkills = persistence.getAllMappings();
         logger.debug("Previously persisted skills: {}", persistedSkills);
     }
 
+    /**
+     * Retrieves skills trees.
+     * @throws GitAPIException if a problem with the skills repository occurred
+     * @throws IOException     if a problem in work with files occurred
+     */
     public void retrieveSkillsTrees() throws GitAPIException, IOException {
         File skillsDir;
         skillsDir = gitExtractor.getDirWithSkills();
@@ -74,9 +88,13 @@ public class SkillsUpdater {
         }
     }
 
+    /**
+     * Updates skills in the persistence layer from the changes in skills tree repository.
+     * @throws IOException if a problem with skills transformation to JSON occurred
+     */
     public void updateSkills() throws IOException {
         for (SkillsTree skillsTree : skillsTrees.values()) {
-            String skillsTreeJson = sToJsonTransformer.transform(skillsTree);
+            String skillsTreeJson = skillsToJsonTransformer.transform(skillsTree);
             webSiteConstructor.updateSkillsTree(skillsTreeJson);
 
             skillsTree.getSkills().forEach((id, skill) ->

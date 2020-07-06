@@ -20,12 +20,21 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Extractor of skills tree files, works with the skills tree repository.
+ */
 public class GitExtractor {
 
-    private final static Logger logger = LoggerFactory.getLogger(GitExtractor.class);
+    private static final Logger logger = LoggerFactory.getLogger(GitExtractor.class);
 
     private final File repoDir;
 
+    /**
+     * Constructor.
+     * @param repoDir directory with skills tree files (can be empty, then the files will be copied there from
+     *                the repository)
+     *
+     */
     public GitExtractor(File repoDir) {
         this.repoDir = repoDir;
         if (!repoDir.exists()) {
@@ -36,6 +45,11 @@ public class GitExtractor {
         logger.info("Repository directory: {}", repoDir);
     }
 
+    /**
+     * Retrieves directory with skills from the repository.
+     * @return directory with skills files
+     * @throws GitAPIException if a problem with the repository occured
+     */
     public File getDirWithSkills() throws GitAPIException {
         try {
             Git.open(repoDir).pull().call();
@@ -68,6 +82,10 @@ public class GitExtractor {
         return directoryToBeDeleted.delete();
     }
 
+    /**
+     * Retrieves the last commit's id.
+     * @return commit ID
+     */
     public String getLastCommitId() {
         try (Repository repository = Git.open(repoDir).getRepository()) {
             ObjectId head = repository.resolve(Constants.HEAD);
@@ -79,6 +97,11 @@ public class GitExtractor {
         }
     }
 
+    /**
+     * Retrieves the list of changed skills files after the specified commit ID.
+     * @param commitId commit ID to search after
+     * @return list of commit IDs
+     */
     public List<String> getListOfChangedFilesAfter(String commitId) {
         List<String> result = new ArrayList<>();
 

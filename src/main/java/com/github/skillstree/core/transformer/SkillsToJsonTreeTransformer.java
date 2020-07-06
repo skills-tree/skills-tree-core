@@ -23,6 +23,12 @@ public class SkillsToJsonTreeTransformer {
     public SkillsToJsonTreeTransformer() {
     }
 
+    /**
+     * Transforms skills tree into JSON string.
+     * @param skillsTree {@link SkillsTree}
+     * @return JSON representation of the specified skills tree
+     * @throws IOException if the problem with transformation occurred
+     */
     public String transform(SkillsTree skillsTree) throws IOException {
         logger.debug("Transformation of {} is requested", skillsTree);
 
@@ -52,7 +58,7 @@ public class SkillsToJsonTreeTransformer {
     private void parseChildren(SkillsTreeJson.NodeStructure parent, Skill skill, SkillsTree skillsTree) {
         SkillsTreeJson.NodeStructure child = new SkillsTreeJson.NodeStructure()
                 .setHtmlId(skill.getId().toString())
-                .setInnerHTML("<div onclick='obtainSkill(\"" + skill.getId() + "\", 1)'>" + skill.getName() +"</div>");
+                .setInnerHtml("<div onclick='obtainSkill(\"" + skill.getId() + "\", 1)'>" + skill.getName() + "</div>");
         parent.addChild(child);
 
         skill.getChildren().forEach(id -> parseChildren(child, skillsTree.getSkills().get(id), skillsTree));

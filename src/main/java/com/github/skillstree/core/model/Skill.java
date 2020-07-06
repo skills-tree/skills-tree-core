@@ -85,10 +85,15 @@ public class Skill {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Skill skill = (Skill) o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        Skill skill = (Skill) obj;
         return Objects.equals(name, skill.name) &&
                 Objects.equals(description, skill.description) &&
                 Objects.equals(children, skill.children);

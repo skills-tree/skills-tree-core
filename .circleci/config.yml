@@ -3,11 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/openjdk:11-jdk-buster
-
     working_directory: ~/repo
-
-    environment:
-      MAVEN_OPTS: -Xmx3200m
 
     steps:
       - checkout
@@ -25,18 +21,30 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      # Static analysis
-      - run: mvn checkstyle:checkstyle
+      - run:
+          name: Static analysis
+          command: mvn checkstyle:checkstyle
 
-      # Unit & Integration Tests
-      - run: mvn verify
+      - run:
+          name: Unit & Integration Tests
+          command: mvn verify
 
-      - run: mvn -s .circleci/settings.xml deploy
+  deploy:
+    docker:
+      - image: circleci/openjdk:11-jdk-buster
+    working_directory: ~/repo
 
-      # - run: mvn sonar:sonar
+    steps:
+      - checkout
+      - run: mvn -s .circleci/settings.xml -DskipTests deploy
 
-#workflows:
-#  main:
-#    jobs:
-#      - build:
-#          context: SonarCloud
+workflows:
+  main:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
