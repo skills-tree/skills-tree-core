@@ -1,4 +1,5 @@
 version: 2.1
+
 jobs:
   build:
     docker:
@@ -22,12 +23,16 @@ jobs:
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
       - run:
-          name: Static analysis
+          name: Checkstyle
           command: mvn checkstyle:checkstyle
 
       - run:
           name: Unit & Integration Tests
           command: mvn verify
+
+      - run:
+          name: Static Analysis
+          command: mvn sonar:sonar
 
   deploy:
     docker:
@@ -49,7 +54,8 @@ jobs:
 workflows:
   main:
     jobs:
-      - build
+      - build:
+          context: SonarCloud
       - deploy:
           requires:
             - build
