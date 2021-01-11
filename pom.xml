@@ -13,7 +13,7 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <logback.version>1.3.0-alpha5</logback.version>
-        <jackson.version>2.10.3</jackson.version>
+        <jackson.version>2.12.1</jackson.version>
 
         <checkstyle.url>https://raw.githubusercontent.com/ilyavy/checkstyle/master/checkstyle.xml</checkstyle.url>
 
